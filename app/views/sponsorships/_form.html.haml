@@ -80,6 +80,7 @@
           = contact_form.label :_keep, t('.specify_alternate_billing_contact'), class: 'form-check-label'
 
       %fieldset.d-none
+        %p.alert.alert-info= t('.alternate_billing_contact_help')
         .form-group
           = contact_form.label :email
           = contact_form.email_field :email, class: 'form-control', required: true

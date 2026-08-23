@@ -157,6 +157,7 @@ en:
       billing: 'Billing Information'
       billing_help: 'Please provide billing information for invoicing. If you have any special requests, use the additional note field below. Note that we will issue invoices in PDF format via email; No hardcopy will be sent.'
       specify_alternate_billing_contact: 'Specify an alternate contact for billing'
+      alternate_billing_contact_help: 'Blank fields are automatically copied from the primary contact. Edit only the fields that differ, and leave the copied formal information unchanged where it is the same.'
       billing_request_help: 'Use this field especially if you have: requirement of contract or submitting form, explicit due date for a bill...'
       plan: 'Sponsorship Package'
       plans: 'Pick a plan:'

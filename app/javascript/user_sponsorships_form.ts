@@ -19,11 +19,50 @@ document.addEventListener("DOMContentLoaded", () => {
           ".form-check input[type=checkbox]",
         ) as HTMLInputElement;
         const fieldset = elem.querySelector("fieldset") as HTMLFieldSetElement;
+        const contactAttributes = [
+          "email",
+          "address",
+          "organization",
+          "unit",
+          "name",
+        ];
+        const contactFields = contactAttributes.map((attribute) => ({
+          primary: formElem.querySelector<HTMLInputElement>(
+            `[name="sponsorship[contact_attributes][${attribute}]"]`,
+          ),
+          alternate: elem.querySelector<HTMLInputElement>(
+            `[name="sponsorship[alternate_billing_contact_attributes][${attribute}]"]`,
+          ),
+        }));
+
+        const copyPrimaryContact = () => {
+          contactFields.forEach(({ primary, alternate }) => {
+            if (!primary || !alternate) return;
+            if (
+              alternate.dataset.copiedFromPrimary === "true" ||
+              (alternate.value === "" && alternate.dataset.edited !== "true")
+            ) {
+              alternate.value = primary.value;
+              alternate.dataset.copiedFromPrimary = "true";
+            }
+          });
+        };
+
+        contactFields.forEach(({ primary, alternate }) => {
+          primary?.addEventListener("input", () => {
+            if (checkbox.checked) copyPrimaryContact();
+          });
+          alternate?.addEventListener("input", () => {
+            delete alternate.dataset.copiedFromPrimary;
+            alternate.dataset.edited = "true";
+          });
+        });
 
         const handleChange = (e?: Event) => {
           if (checkbox.checked) {
             fieldset.classList.remove("d-none");
             fieldset.disabled = false;
+            copyPrimaryContact();
           } else {
             fieldset.classList.add("d-none");
             fieldset.disabled = true;
