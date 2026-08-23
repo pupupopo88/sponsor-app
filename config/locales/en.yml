@@ -201,6 +201,7 @@ en:
         no_booth: 'without booth'
         booth: 'with booth'
       information: 'Sponsor Information'
+      required_fields_note: 'indicates a required field.'
       information_help: |
         Please provide a short introduction of your company. Note that the length of the introduction will vary depending on the sponsorship plan you chose. If you submit a preliminary information or prefer to submit later, let us know via [Others] field below. We'll hold the information from publication on our website.
       logo: 'Logo'
