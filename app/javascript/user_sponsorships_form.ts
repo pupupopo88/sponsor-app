@@ -111,9 +111,15 @@ document.addEventListener("DOMContentLoaded", () => {
     calculateTotalAttendees();
 
     formElem.querySelectorAll(".sponsorships_form_plans").forEach((elem) => {
-      const boothCheckbox = formElem.querySelector(
-        ".sponsorships_form_booth_request input[type=checkbox]",
-      ) as HTMLInputElement;
+      const boothRequestRadios = formElem.querySelectorAll<HTMLInputElement>(
+        ".sponsorships_form_booth_request input[type=radio]",
+      );
+      const boothYesRadio = formElem.querySelector<HTMLInputElement>(
+        '.sponsorships_form_booth_request input[type=radio][value="true"]',
+      );
+      const boothNoRadio = formElem.querySelector<HTMLInputElement>(
+        '.sponsorships_form_booth_request input[type=radio][value="false"]',
+      );
       const uneligibleHelpTextElem = formElem.querySelector(
         ".sponsorships_form_booth_request_uneligible",
       ) as Element;
@@ -136,11 +142,13 @@ document.addEventListener("DOMContentLoaded", () => {
       const handleChange = (e: HTMLInputElement | null) => {
         if (e?.dataset.booth == "1") {
           uneligibleHelpTextElem.classList.add("d-none");
-          boothCheckbox.disabled = false;
+          boothRequestRadios.forEach((radio) => (radio.disabled = false));
         } else {
           uneligibleHelpTextElem.classList.remove("d-none");
-          boothCheckbox.checked = false;
-          boothCheckbox.disabled = true;
+          if (boothYesRadio) boothYesRadio.checked = false;
+          if (boothNoRadio) boothNoRadio.checked = true;
+          if (boothYesRadio) boothYesRadio.disabled = true;
+          if (boothNoRadio) boothNoRadio.disabled = false;
         }
 
         if (printStickerSponsorCheckbox && printStickerSponsorHelpTextElem) {
@@ -178,6 +186,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const planRadio = planRadioElem as HTMLInputElement;
         planRadio.addEventListener("change", (e) => {
           calculateTotalAttendees();
+          boothRequestRadios.forEach((radio) => (radio.checked = false));
           handleChange(e.target as HTMLInputElement);
         });
       });
@@ -197,11 +206,11 @@ document.addEventListener("DOMContentLoaded", () => {
           const selectedPlanElem = formElem.querySelector<HTMLInputElement>(
             ".sponsorships_form_plans input[type=radio]:checked",
           );
-          const boothCheckbox = formElem.querySelector<HTMLInputElement>(
-            ".sponsorships_form_booth_request input[type=checkbox]",
+          const boothYesRadio = formElem.querySelector<HTMLInputElement>(
+            '.sponsorships_form_booth_request input[type=radio][value="true"]:checked',
           );
 
-          const boothRequested = boothCheckbox?.checked || false;
+          const boothRequested = !!boothYesRadio;
           const selectedPlanName = selectedPlanElem?.dataset.planName;
 
           let visibleCount = 0;
@@ -298,14 +307,14 @@ document.addEventListener("DOMContentLoaded", () => {
           );
           const selectedPlanName = selectedPlanElem?.dataset.planName || "";
 
-          const boothCheckbox = formElem.querySelector<HTMLInputElement>(
-            ".sponsorships_form_booth_request input[type=checkbox]",
+          const boothYesRadio = formElem.querySelector<HTMLInputElement>(
+            '.sponsorships_form_booth_request input[type=radio][value="true"]',
           );
           priorityHuman.unshift(
             `{plan}${
-              boothCheckbox?.disabled
+              boothYesRadio?.disabled
                 ? ""
-                : `!${boothCheckbox?.checked ? "booth" : "no_booth"}`
+                : `!${boothYesRadio?.checked ? "booth" : "no_booth"}`
             }`,
           );
 
@@ -355,7 +364,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         formElem
           .querySelectorAll<HTMLInputElement>(
-            ".sponsorships_form_booth_request input[type=checkbox]",
+            ".sponsorships_form_booth_request input[type=radio]",
           )
           .forEach((boothCheckbox) => {
             boothCheckbox.addEventListener("change", () => {
