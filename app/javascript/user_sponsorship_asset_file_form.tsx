@@ -1,9 +1,8 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
 
-import AssetFileForm, {
-  AssetFileFormAPI,
-} from "./AssetFileForm";
+import AssetFileForm, { AssetFileFormAPI } from "./AssetFileForm";
+import { SponsorLogoValidator } from "./sponsor_logo_validator";
 
 declare global {
   interface Window {
@@ -45,31 +44,31 @@ document.addEventListener("DOMContentLoaded", () => {
       const sessionEndpointMethod = elem.dataset.sessionEndpointMethod;
       if (!sessionEndpoint || !sessionEndpointMethod) return;
 
-      const onFileChange = (file: File | null) => {
-        console.log("File changed:", file?.type);
-        const warningsToShow = new Map<string, boolean>();
+      const logoPreview = form.querySelector<HTMLElement>(
+        ".sponsorships_form_logo_preview",
+      );
+      const logoConfirmation = form.querySelector<HTMLInputElement>(
+        'input[type="checkbox"][name="sponsorship[logo_confirmation]"]',
+      );
+      const logoValidator =
+        logoPreview && logoConfirmation
+          ? new SponsorLogoValidator(logoPreview, logoConfirmation)
+          : null;
 
-        if (
+      const onFileChange = (file: File | null) => {
+        const zipSelected =
           file?.type === "application/zip" ||
           file?.type === "application/x-zip-compressed" ||
-          file?.name.endsWith(".zip")
-        ) {
-          warningsToShow.set("zip_asset", true);
-        }
-
-        const warningElems = form.querySelectorAll<HTMLElement>(
-          ".sponsorships_form_asset_file_form__warning",
+          file?.name.endsWith(".zip") === true;
+        const zipWarning = form.querySelector<HTMLElement>(
+          '[data-warning-kind="zip_asset"]',
         );
 
-        warningElems.forEach((w) => {
-          if (warningsToShow.has(w.dataset.warningKind || "")) {
-            w.classList.remove("d-none");
-            w.querySelectorAll("input").forEach((i) => (i.required = true));
-          } else {
-            w.classList.add("d-none");
-            w.querySelectorAll("input").forEach((i) => (i.required = false));
-          }
-        });
+        zipWarning?.classList.toggle("d-none", !zipSelected);
+        zipWarning
+          ?.querySelectorAll("input")
+          .forEach((input) => (input.required = zipSelected));
+        logoValidator?.validate(file);
       };
 
       const componentRef = React.createRef<AssetFileFormAPI>();
@@ -89,12 +88,14 @@ document.addEventListener("DOMContentLoaded", () => {
           sessionEndpointMethod={sessionEndpointMethod}
           accept="image/png,image/jpeg"
           onFileChange={onFileChange}
-        />
+        />,
       );
 
       // Add ref to global array - it will be populated when component mounts
       window.rksSponsorshipAssetFileForms.push(componentRef);
-      console.log("Registered AssetFileForm (ref will be available after mount)");
+      console.log(
+        "Registered AssetFileForm (ref will be available after mount)",
+      );
       form.addEventListener("submit", async function (e) {
         e.preventDefault();
         form

@@ -227,6 +227,7 @@
         if sponsorship.asset_file&.persisted?
           asset_file_state = :existing
           asset_file_url = user_conference_sponsorship_asset_file_path(conference, sponsorship.asset_file)
+          asset_file_preview_url = user_conference_sponsorship_asset_file_path(conference, sponsorship.asset_file, disposition: :inline)
           # Copying from another sponsorship (:copy) or failed validation (:unclaimed)
           if sponsorship.new_record?
             # We need to query it again as foo.assoc=other rewrites other.foo
@@ -235,10 +236,12 @@
             if claimed_asset_file
               asset_file_state = :copy
               asset_file_url = user_conference_sponsorship_asset_file_path(asset_sponsorship.conference, claimed_asset_file)
+              asset_file_preview_url = user_conference_sponsorship_asset_file_path(asset_sponsorship.conference, claimed_asset_file, disposition: :inline)
               raise "asset_file_state=:copy, assertion failed, conference_id must differ when copy; asset_file_id=#{sponsorship.asset_file.id}" unless asset_sponsorship.conference_id != conference.id
             else
               asset_file_state = :unclaimed
               asset_file_url = user_conference_sponsorship_asset_file_path(conference, sponsorship.asset_file)
+              asset_file_preview_url = user_conference_sponsorship_asset_file_path(conference, sponsorship.asset_file, disposition: :inline)
             end
           end
         end
@@ -258,6 +261,28 @@
 
         - if sponsorship.asset_file
           %small.form-text= link_to t('helpers.download_previously_uploaded'), asset_file_url
+
+      .sponsorships_form_logo_preview.mt-3{data: {
+        aspect_ratio_error: t('.logo_aspect_ratio_error'),
+        aspect_ratio_valid: t('.logo_aspect_ratio_valid'),
+        dimensions_label: t('.logo_dimensions_label'),
+        format_label: t('.logo_format_label'),
+        image_load_error: t('.logo_image_load_error'),
+        missing_dpi: t('.logo_missing_dpi'),
+        required_dimensions: t('.logo_required_dimensions'),
+        required_dpi: t('.logo_required_dpi'),
+        resolution_label: t('.logo_resolution_label'),
+        rgb_error: t('.logo_rgb_error'),
+        rgb_valid: t('.logo_rgb_valid'),
+        validation_checking: t('.logo_validation_checking'),
+        validation_error: t('.logo_validation_error'),
+      }}
+        - if sponsorship.asset_file
+          %img.img-thumbnail{src: asset_file_preview_url, alt: t('.logo_preview_alt'), style: 'max-width: 320px; max-height: 320px;'}
+
+      .form-check.mt-3
+        = form.check_box :logo_confirmation, class: 'form-check-input', required: true
+        = form.label :logo_confirmation, t('.logo_confirmation'), class: 'form-check-label'
 
     %div.py-3.sponsorships_form_asset_file_form__warning.d-none{data: {warning_kind: 'zip_asset'}}
       .card

@@ -12,6 +12,7 @@ ja:
         fallback_option: '優先順位'
         number_of_additional_attendees: '追加Attendeeチケット枚数'
         policy_agreement: 'ポリシーへ同意する'
+        logo_confirmation: 'ロゴ画像の確認'
 
       sponsorship/note: &note
         body: 'その他の連絡事項'
@@ -204,6 +205,21 @@ ja:
         Webサイトや会場にて掲示するため、ロゴファイルをアップロードしてください。
         ロゴファイル画像には規定の仕様形式がございます。
         <a href="https://esa-pages.io/p/sharing/14929/posts/846/ce6470e4fec9d63ae08e.html">テンプレートREADME</a>をご確認の上、提出をお願いいたします。
+      logo_preview_alt: 'アップロードするロゴのプレビュー'
+      logo_aspect_ratio_error: 'ロゴ画像は縦横比が1:1の正方形にしてください。'
+      logo_aspect_ratio_valid: '縦横比は1:1です。'
+      logo_dimensions_label: '画像サイズ'
+      logo_format_label: '画像形式'
+      logo_image_load_error: '画像を読み込めませんでした。別のPNGまたはJPEG画像を選択してください。'
+      logo_missing_dpi: 'DPI情報がありません'
+      logo_required_dimensions: '2,894 × 2,894 pxにしてください'
+      logo_required_dpi: '350 dpiにしてください'
+      logo_resolution_label: '解像度'
+      logo_rgb_error: 'カラーモードは透過なしのRGBにしてください。'
+      logo_rgb_valid: 'カラーモードはRGBです。'
+      logo_validation_checking: '画像の仕様を確認しています…'
+      logo_validation_error: 'ロゴ画像が仕様を満たしていません。'
+      logo_confirmation: 'アップロードした画像が、意図したロゴデータであり、不要な要素を含んでいないことを確認しました'
       tickets: 'Attendee チケット'
       tickets_included_in_plan: 'スポンサープランに含まれている枚数'
       tickets_additionally_request: '追加する枚数'

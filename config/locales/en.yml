@@ -12,6 +12,7 @@ en:
         fallback_option: 'Alternative Plan Preference'
         number_of_additional_attendees: 'Number of Additional Attendees'
         policy_agreement: 'I confirmed and agree with the policies'
+        logo_confirmation: 'Logo confirmation'
 
       sponsorship/note: &note
         body: 'Note'
@@ -208,6 +209,21 @@ en:
         Upload your company logo file for the sponsors page in our website, and the venue onsite.
         There are specific format requirements for the logo image file.
         Please refer to <a href="https://esa-pages.io/p/sharing/14929/posts/846/ce6470e4fec9d63ae08e.html">the template README</a> before submitting.
+      logo_preview_alt: 'Preview of the logo to upload'
+      logo_aspect_ratio_error: 'The logo image must have a square 1:1 aspect ratio.'
+      logo_aspect_ratio_valid: 'The image has a square 1:1 aspect ratio.'
+      logo_dimensions_label: 'Image size'
+      logo_format_label: 'Image format'
+      logo_image_load_error: 'The image could not be loaded. Select another PNG or JPEG image.'
+      logo_missing_dpi: 'DPI information is missing'
+      logo_required_dimensions: 'Use 2,894 × 2,894 px'
+      logo_required_dpi: 'Use 350 dpi'
+      logo_resolution_label: 'Resolution'
+      logo_rgb_error: 'The color mode must be RGB without transparency.'
+      logo_rgb_valid: 'The color mode is RGB.'
+      logo_validation_checking: 'Checking the image requirements…'
+      logo_validation_error: 'The logo image does not meet the requirements.'
+      logo_confirmation: 'I confirmed that this is the intended logo image and that it contains no unintended elements'
       others_help: |
         Use the following field for anything you want let us know in advance.
       note: 'Others'
