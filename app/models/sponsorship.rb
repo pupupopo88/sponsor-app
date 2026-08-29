@@ -89,6 +89,7 @@ class Sponsorship < ApplicationRecord
   validate :validate_word_count, on: :update_by_user
   validate :validate_no_plan_allowance, on: :update_by_user
   validate :validate_fallback_option, on: :update_by_user
+  validate :validate_latin_text_information, on: :update_by_user
   validate :policy_agreement
 
   accepts_nested_attributes_for :contact, allow_destroy: true, reject_if: ->(attrs) { attrs['kind'].present? }
@@ -328,6 +329,12 @@ class Sponsorship < ApplicationRecord
         errors.add :fallback_option, :invalid
       end
     end
+  end
+
+  private def validate_latin_text_information
+    latin_text = /\A[\p{Latin}\p{Common}\p{Inherited}]*\z/
+    errors.add(:name, :must_use_latin_characters) unless name.to_s.unicode_normalize(:nfc).match?(latin_text)
+    errors.add(:profile, :must_use_latin_characters) unless profile.to_s.unicode_normalize(:nfc).match?(latin_text)
   end
 
   private def generate_ticket_key

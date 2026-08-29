@@ -178,6 +178,32 @@ RSpec.describe Sponsorship, type: :model do
       expect(sponsorship).not_to be_valid(:update_by_user)
       expect(sponsorship.errors.of_kind?(:print_sticker_sponsor_requested, :not_eligible)).to be true
     end
+
+    it 'rejects non-Latin sponsor information submitted by a user' do
+      FactoryBot.create(:form_description, conference:)
+      sponsorship = FactoryBot.build(:sponsorship, conference:, plan:, name: '株式会社Example')
+      sponsorship.policy_agreement = true
+
+      expect(sponsorship).not_to be_valid(:update_by_user)
+      expect(sponsorship.errors.of_kind?(:name, :must_use_latin_characters)).to be true
+    end
+
+    it 'accepts Latin sponsor information containing decomposed characters' do
+      FactoryBot.create(:form_description, conference:)
+      sponsorship = FactoryBot.build(:sponsorship, conference:, plan:, name: "Cafe\u0301 & Co.")
+      sponsorship.policy_agreement = true
+
+      expect(sponsorship).to be_valid(:update_by_user)
+    end
+
+    it 'rejects Greek and Cyrillic sponsor information submitted by a user' do
+      FactoryBot.create(:form_description, conference:)
+      sponsorship = FactoryBot.build(:sponsorship, conference:, plan:, name: 'Example Ω Пример')
+      sponsorship.policy_agreement = true
+
+      expect(sponsorship).not_to be_valid(:update_by_user)
+      expect(sponsorship.errors.of_kind?(:name, :must_use_latin_characters)).to be true
+    end
   end
 
   describe 'state management' do
