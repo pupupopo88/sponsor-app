@@ -75,6 +75,43 @@ RSpec.describe "Admin Invoices", type: :request do
     expect(invoice_rows.size).to eq(2)
   end
 
+  it 'exports an approved expense report as a negative custom sponsorship item' do
+    ExpenseReport.create!(sponsorship: custom_en_sponsorship, status: 'approved', total_amount: 100_000)
+
+    get conference_invoices_path(conference, format: :csv), params: {
+      filters: 1,
+      locales: ['en'],
+      plan_ids: [ruby_plan.id],
+      customization_filter: 'with',
+    }
+
+    custom_item = CSV.parse(response.body).find { |row| row[29] == 'カスタムスポンサー費用分' }
+    expect(response).to have_http_status(:ok)
+    expect(custom_item.values_at(31, 36)).to eq(%w[-100000 -100000])
+  end
+
+  it 'shows negative invoices separately in HTML and excludes them from CSV' do
+    ExpenseReport.create!(sponsorship: custom_en_sponsorship, status: 'approved', total_amount: 400_000)
+    filter_params = {
+      filters: 1,
+      locales: ['en'],
+      plan_ids: [ruby_plan.id],
+      customization_filter: 'with',
+    }
+
+    get conference_invoices_path(conference), params: filter_params
+
+    expect(response).to have_http_status(:ok)
+    assert_select '.card-header', text: 'Excluded invoices (negative subtotal)', count: 1
+    assert_select '.alert.alert-warning', text: /will not be included in the CSV export/, count: 1
+    assert_select 'td', text: '-100000', minimum: 1
+
+    get conference_invoices_path(conference, format: :csv), params: filter_params
+
+    expect(response).to have_http_status(:ok)
+    expect(invoice_rows).to be_empty
+  end
+
   private def invoice_rows
     CSV.parse(response.body).select { |row| row[1] == '請求書' }
   end

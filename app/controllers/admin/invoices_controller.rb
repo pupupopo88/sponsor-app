@@ -11,7 +11,10 @@ module Admin
       invoice_csv = InvoiceExports::MoneyForwardCsv.new(conference: @conference, sponsorships: @invoice_filter.sponsorships, invoice_date: @invoice_date)
 
       respond_to do |format|
-        format.html { @invoice_rows = invoice_csv.rows }
+        format.html do
+          @invoice_rows = invoice_csv.rows
+          @excluded_invoice_rows = invoice_csv.excluded_rows
+        end
         format.csv do
           send_data(invoice_csv.to_csv, filename: "#{@conference.name.underscore.gsub(" ", "_")}_invoices.csv")
         end

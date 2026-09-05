@@ -23,7 +23,7 @@ module InvoiceExports
     def sponsorships
       @sponsorships ||= filter_by_customization(
         base_scope.where(locale: selected_locales, plan_id: selected_plan_ids),
-      ).includes_contacts.includes(:plan).order(:plan_id, :id)
+      ).includes_contacts.includes(:plan, :expense_report).order(:plan_id, :id)
     end
 
     def customization_options

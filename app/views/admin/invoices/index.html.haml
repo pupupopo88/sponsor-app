@@ -39,18 +39,9 @@
       = submit_tag 'Update', class: 'btn btn-primary'
       = button_tag 'Export CSV', type: :submit, formaction: conference_invoices_path(@conference, format: :csv), class: 'btn btn-secondary ml-2'
 
-.row
-  .col-12
-    .card.responsive-table
-      .card-header Table
-      %div{style: 'overflow-x: scroll;'}
-        %table.card-body.table.table-hover.table-small{style: 'border-collapse: collapse; white-space: nowrap;width: 100%;'}
-          %thead
-            %tr
-              - @invoice_rows[0].each do |head|
-                %th{scope: :col}= head
-          %tbody
-            - @invoice_rows[1..].each do |sponsorship|
-              %tr
-                - sponsorship.each do |col|
-                  %td= col
+= render 'invoice_table', title: 'Invoices included in CSV export', rows: @invoice_rows
+
+- if @excluded_invoice_rows.many?
+  .alert.alert-warning.mt-3
+    The invoices below have a negative subtotal and will not be included in the CSV export.
+  = render 'invoice_table', title: 'Excluded invoices (negative subtotal)', rows: @excluded_invoice_rows
