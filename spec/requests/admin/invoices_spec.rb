@@ -26,7 +26,7 @@ RSpec.describe "Admin Invoices", type: :request do
   end
 
   it 'exports every sponsorship by default' do
-    get conference_invoices_path(conference, format: :csv)
+    get conference_invoices_path(conference, format: :csv), params: {delivery_date: '2026-10-03'}
 
     expect(response).to have_http_status(:ok)
     expect(invoice_rows.size).to eq(3)
@@ -43,6 +43,8 @@ RSpec.describe "Admin Invoices", type: :request do
     assert_select 'input[type="radio"][name="customization_filter"]', count: 3
     assert_select 'input[type="radio"][name="customization_filter"][value="all"][checked="checked"]', count: 1
     assert_select 'input[name="starting_invoice_number"][value="001"]', count: 1
+    assert_select 'label[for="delivery_date"]', text: 'Delivery date (conference first day)', count: 1
+    assert_select 'input[name="delivery_date"][required="required"]', count: 1
   end
 
   it 'provides a CSV export button that submits the current filters' do
@@ -58,6 +60,7 @@ RSpec.describe "Admin Invoices", type: :request do
       locales: ['en'],
       plan_ids: [ruby_plan.id],
       customization_filter: 'with',
+      delivery_date: '2026-10-03',
     }
 
     expect(response).to have_http_status(:ok)
@@ -70,6 +73,7 @@ RSpec.describe "Admin Invoices", type: :request do
       locales: %w[en ja],
       plan_ids: [ruby_plan.id, gold_plan.id],
       customization_filter: 'without',
+      delivery_date: '2026-10-03',
     }
 
     expect(response).to have_http_status(:ok)
@@ -77,7 +81,7 @@ RSpec.describe "Admin Invoices", type: :request do
   end
 
   it 'numbers exported invoices sequentially from the specified starting number' do
-    get conference_invoices_path(conference, format: :csv), params: {starting_invoice_number: 42}
+    get conference_invoices_path(conference, format: :csv), params: {starting_invoice_number: 42, delivery_date: '2026-10-03'}
 
     date_prefix = Time.zone.today.strftime('%Y%m%d')
     expect(invoice_rows.map { |row| row.fetch(6) }).to eq(["#{date_prefix}-042", "#{date_prefix}-043", "#{date_prefix}-044"])
@@ -91,6 +95,7 @@ RSpec.describe "Admin Invoices", type: :request do
       locales: ['en'],
       plan_ids: [ruby_plan.id],
       customization_filter: 'with',
+      delivery_date: '2026-10-03',
     }
 
     custom_item = CSV.parse(response.body).find { |row| row[29] == 'カスタムスポンサー費用分' }
@@ -105,6 +110,7 @@ RSpec.describe "Admin Invoices", type: :request do
       locales: ['en'],
       plan_ids: [ruby_plan.id],
       customization_filter: 'with',
+      delivery_date: '2026-10-03',
     }
 
     get conference_invoices_path(conference), params: filter_params
@@ -123,10 +129,24 @@ RSpec.describe "Admin Invoices", type: :request do
   it 'does not consume invoice numbers for excluded negative invoices' do
     ExpenseReport.create!(sponsorship: custom_en_sponsorship, status: 'approved', total_amount: 400_000)
 
-    get conference_invoices_path(conference, format: :csv), params: {starting_invoice_number: 7}
+    get conference_invoices_path(conference, format: :csv), params: {starting_invoice_number: 7, delivery_date: '2026-10-03'}
 
     date_prefix = Time.zone.today.strftime('%Y%m%d')
     expect(invoice_rows.map { |row| row.fetch(6) }).to eq(["#{date_prefix}-007", "#{date_prefix}-008"])
+  end
+
+  it 'sets the specified delivery date on every exported item' do
+    get conference_invoices_path(conference, format: :csv), params: {delivery_date: '2026-10-03'}
+
+    item_rows = CSV.parse(response.body).select { |row| row[1] == '品目' }
+    expect(item_rows.map { |row| row.fetch(28) }.uniq).to eq(['2026/10/03'])
+  end
+
+  it 'does not export CSV without a delivery date' do
+    get conference_invoices_path(conference, format: :csv)
+
+    expect(response).to redirect_to(conference_invoices_path(conference))
+    expect(flash[:alert]).to eq('Delivery date is required.')
   end
 
   private def invoice_rows

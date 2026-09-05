@@ -7,12 +7,14 @@ module Admin
     # https://biz.moneyforward.com/support/invoice/faq/invoice/invoice002.html
     def index
       @invoice_date = params[:invoice_date].present? ? Date.parse(params[:invoice_date]) : Time.zone.today
+      @delivery_date = Date.parse(params[:delivery_date]) if params[:delivery_date].present?
       @starting_invoice_number = [params[:starting_invoice_number].to_i, 1].max
       @invoice_filter = InvoiceExports::SponsorshipFilter.new(conference: @conference, params: invoice_filter_params)
       invoice_csv = InvoiceExports::MoneyForwardCsv.new(
         conference: @conference,
         sponsorships: @invoice_filter.sponsorships,
         invoice_date: @invoice_date,
+        delivery_date: @delivery_date,
         starting_invoice_number: @starting_invoice_number,
       )
 
@@ -22,7 +24,11 @@ module Admin
           @excluded_invoice_rows = invoice_csv.excluded_rows
         end
         format.csv do
-          send_data(invoice_csv.to_csv, filename: "#{@conference.name.underscore.gsub(" ", "_")}_invoices.csv")
+          if @delivery_date
+            send_data(invoice_csv.to_csv, filename: "#{@conference.name.underscore.gsub(" ", "_")}_invoices.csv")
+          else
+            redirect_to conference_invoices_path(@conference), alert: 'Delivery date is required.'
+          end
         end
       end
     end

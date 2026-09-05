@@ -16,6 +16,10 @@
         = date_field_tag :invoice_date, @invoice_date, class: 'form-control', required: true
 
       .form-group
+        = label_tag :delivery_date, 'Delivery date (conference first day)'
+        = date_field_tag :delivery_date, @delivery_date, class: 'form-control', required: true
+
+      .form-group
         = label_tag :starting_invoice_number, 'Starting invoice number'
         = number_field_tag :starting_invoice_number, format('%03d', @starting_invoice_number), class: 'form-control', min: 1, step: 1, required: true
 
