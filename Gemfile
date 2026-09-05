@@ -47,6 +47,7 @@ gem 'aws_lambda_ric', require: false
 gem 'apigatewayv2_rack'
 
 gem 'open3', require: false
+gem 'csv'
 
 gem 'bootsnap', require: false
 

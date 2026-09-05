@@ -19,6 +19,7 @@ Rails.application.routes.draw do
       end
 
       resource :booth_assignment, only: %i(show update)
+      resources :invoices, only: %i(index)
 
       resources :form_descriptions, param: :locale, except: %i(index)
       resources :plans, except: %i(show)

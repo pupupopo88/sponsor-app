@@ -1,0 +1,23 @@
+%nav{aria: {label: 'breadcrumb'}}
+  %ol.breadcrumb
+    %li.breadcrumb-item= link_to @conference.name, conference_path(@conference)
+    %li.breadcrumb-item.active{aria: {current: 'page'}} Invoices
+
+.d-md-flex.justify-content-between
+  %h3 Invoices
+
+.row
+  .col-12
+    .card.responsive-table
+      .card-header Table
+      %div{style: 'overflow-x: scroll;'}
+        %table.card-body.table.table-hover.table-small{style: 'border-collapse: collapse; white-space: nowrap;width: 100%;'}
+          %thead
+            %tr
+              - @invoice_rows[0].each do |head|
+                %th{scope: :col}= head
+          %tbody
+            - @invoice_rows[1..].each do |sponsorship|
+              %tr
+                - sponsorship.each do |col|
+                  %td= col
