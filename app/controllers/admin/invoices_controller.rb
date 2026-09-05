@@ -7,8 +7,8 @@ module Admin
     # https://biz.moneyforward.com/support/invoice/faq/invoice/invoice002.html
     def index
       @invoice_date = params[:invoice_date].present? ? Date.parse(params[:invoice_date]) : Time.zone.today
-      sponsorships = @conference.sponsorships.active.includes_contacts.includes(:plan).order(:plan_id, :id)
-      invoice_csv = InvoiceExports::MoneyForwardCsv.new(conference: @conference, sponsorships:, invoice_date: @invoice_date)
+      @invoice_filter = InvoiceExports::SponsorshipFilter.new(conference: @conference, params: invoice_filter_params)
+      invoice_csv = InvoiceExports::MoneyForwardCsv.new(conference: @conference, sponsorships: @invoice_filter.sponsorships, invoice_date: @invoice_date)
 
       respond_to do |format|
         format.html { @invoice_rows = invoice_csv.rows }
@@ -21,6 +21,10 @@ module Admin
     private def set_conference
       @conference = Conference.find_by!(slug: params[:conference_slug])
       check_staff_conference_authorization!(@conference)
+    end
+
+    private def invoice_filter_params
+      params.permit(:filters, :customization_filter, locales: [], plan_ids: [])
     end
   end
 end

@@ -9,9 +9,32 @@
 .card.mb-3
   .card-body
     = form_with url: conference_invoices_path(@conference), method: :get, local: true do
+      = hidden_field_tag :filters, 1
+
       .form-group
         = label_tag :invoice_date, 'Invoice date'
         = date_field_tag :invoice_date, @invoice_date, class: 'form-control', required: true
+
+      .form-group
+        %strong Locale
+        - @invoice_filter.locales.each do |locale|
+          .form-check
+            = check_box_tag 'locales[]', locale, @invoice_filter.locale_selected?(locale), id: "locale_#{locale}", class: 'form-check-input'
+            = label_tag "locale_#{locale}", locale, class: 'form-check-label'
+
+      .form-group
+        %strong Plan
+        - @invoice_filter.plans.each do |plan|
+          .form-check
+            = check_box_tag 'plan_ids[]', plan.id, @invoice_filter.plan_selected?(plan), id: "plan_#{plan.id}", class: 'form-check-input'
+            = label_tag "plan_#{plan.id}", plan.name, class: 'form-check-label'
+
+      .form-group
+        %strong Customization
+        - @invoice_filter.customization_options.each do |label, value|
+          .form-check
+            = radio_button_tag :customization_filter, value, @invoice_filter.customization_selected?(value), id: "customization_#{value}", class: 'form-check-input'
+            = label_tag "customization_#{value}", label, class: 'form-check-label'
 
       = submit_tag 'Update', class: 'btn btn-primary'
 
