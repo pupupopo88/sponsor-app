@@ -6,6 +6,15 @@
 .d-md-flex.justify-content-between
   %h3 Invoices
 
+.card.mb-3
+  .card-body
+    = form_with url: conference_invoices_path(@conference), method: :get, local: true do
+      .form-group
+        = label_tag :invoice_date, 'Invoice date'
+        = date_field_tag :invoice_date, @invoice_date, class: 'form-control', required: true
+
+      = submit_tag 'Update', class: 'btn btn-primary'
+
 .row
   .col-12
     .card.responsive-table
