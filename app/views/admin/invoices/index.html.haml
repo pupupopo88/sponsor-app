@@ -37,6 +37,7 @@
             = label_tag "customization_#{value}", label, class: 'form-check-label'
 
       = submit_tag 'Update', class: 'btn btn-primary'
+      = button_tag 'Export CSV', type: :submit, formaction: conference_invoices_path(@conference, format: :csv), class: 'btn btn-secondary ml-2'
 
 .row
   .col-12

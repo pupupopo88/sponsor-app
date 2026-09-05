@@ -44,6 +44,13 @@ RSpec.describe "Admin Invoices", type: :request do
     assert_select 'input[type="radio"][name="customization_filter"][value="all"][checked="checked"]', count: 1
   end
 
+  it 'provides a CSV export button that submits the current filters' do
+    get conference_invoices_path(conference)
+
+    expect(response).to have_http_status(:ok)
+    assert_select 'button[type="submit"][formaction$="/invoices.csv"]', text: 'Export CSV', count: 1
+  end
+
   it 'filters sponsorships by locale, plan, and customization' do
     get conference_invoices_path(conference, format: :csv), params: {
       filters: 1,
