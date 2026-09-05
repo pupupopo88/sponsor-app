@@ -47,7 +47,11 @@
       = submit_tag 'Update', class: 'btn btn-primary'
       = button_tag 'Export CSV', type: :submit, formaction: conference_invoices_path(@conference, format: :csv), class: 'btn btn-secondary ml-2'
 
-= render 'invoice_table', title: 'Invoices included in CSV export', rows: @invoice_rows
+- if @invoice_rows.many?
+  = render 'invoice_table', title: 'Invoices included in CSV export', rows: @invoice_rows
+- else
+  .alert.alert-info
+    There are no invoices to export.
 
 - if @excluded_invoice_rows.many?
   .alert.alert-warning.mt-3

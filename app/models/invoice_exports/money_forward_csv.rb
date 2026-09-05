@@ -65,6 +65,10 @@ module InvoiceExports
       @excluded_rows ||= build_rows(excluded_sponsorships, assign_invoice_numbers: false)
     end
 
+    def exportable?
+      exportable_sponsorships.any?
+    end
+
     def to_csv
       CSV.generate(row_sep: "\r\n") do |csv|
         rows.each { |row| csv << row }

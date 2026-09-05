@@ -116,14 +116,16 @@ RSpec.describe "Admin Invoices", type: :request do
     get conference_invoices_path(conference), params: filter_params
 
     expect(response).to have_http_status(:ok)
+    assert_select '.card-header', text: 'Invoices included in CSV export', count: 0
+    assert_select '.alert.alert-info', text: 'There are no invoices to export.', count: 1
     assert_select '.card-header', text: 'Excluded invoices (negative subtotal)', count: 1
     assert_select '.alert.alert-warning', text: /will not be included in the CSV export/, count: 1
     assert_select 'td', text: '-100000', minimum: 1
 
     get conference_invoices_path(conference, format: :csv), params: filter_params
 
-    expect(response).to have_http_status(:ok)
-    expect(invoice_rows).to be_empty
+    expect(response).to redirect_to(conference_invoices_path(conference, filter_params))
+    expect(flash[:alert]).to eq('There are no invoices to export.')
   end
 
   it 'does not consume invoice numbers for excluded negative invoices' do

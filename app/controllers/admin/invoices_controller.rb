@@ -24,10 +24,12 @@ module Admin
           @excluded_invoice_rows = invoice_csv.excluded_rows
         end
         format.csv do
-          if @delivery_date
+          if @delivery_date.blank?
+            redirect_to conference_invoices_path(@conference), alert: 'Delivery date is required.'
+          elsif invoice_csv.exportable?
             send_data(invoice_csv.to_csv, filename: "#{@conference.name.underscore.gsub(" ", "_")}_invoices.csv")
           else
-            redirect_to conference_invoices_path(@conference), alert: 'Delivery date is required.'
+            redirect_to conference_invoices_path(@conference, request.query_parameters), alert: 'There are no invoices to export.'
           end
         end
       end
