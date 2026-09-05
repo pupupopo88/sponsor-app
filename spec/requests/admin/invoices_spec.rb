@@ -42,6 +42,7 @@ RSpec.describe "Admin Invoices", type: :request do
     assert_select 'input[type="checkbox"][name="plan_ids[]"][checked="checked"]', count: 2
     assert_select 'input[type="radio"][name="customization_filter"]', count: 3
     assert_select 'input[type="radio"][name="customization_filter"][value="all"][checked="checked"]', count: 1
+    assert_select 'input[name="starting_invoice_number"][value="001"]', count: 1
   end
 
   it 'provides a CSV export button that submits the current filters' do
@@ -73,6 +74,13 @@ RSpec.describe "Admin Invoices", type: :request do
 
     expect(response).to have_http_status(:ok)
     expect(invoice_rows.size).to eq(2)
+  end
+
+  it 'numbers exported invoices sequentially from the specified starting number' do
+    get conference_invoices_path(conference, format: :csv), params: {starting_invoice_number: 42}
+
+    date_prefix = Time.zone.today.strftime('%Y%m%d')
+    expect(invoice_rows.map { |row| row.fetch(6) }).to eq(["#{date_prefix}-042", "#{date_prefix}-043", "#{date_prefix}-044"])
   end
 
   it 'exports an approved expense report as a negative custom sponsorship item' do
@@ -110,6 +118,15 @@ RSpec.describe "Admin Invoices", type: :request do
 
     expect(response).to have_http_status(:ok)
     expect(invoice_rows).to be_empty
+  end
+
+  it 'does not consume invoice numbers for excluded negative invoices' do
+    ExpenseReport.create!(sponsorship: custom_en_sponsorship, status: 'approved', total_amount: 400_000)
+
+    get conference_invoices_path(conference, format: :csv), params: {starting_invoice_number: 7}
+
+    date_prefix = Time.zone.today.strftime('%Y%m%d')
+    expect(invoice_rows.map { |row| row.fetch(6) }).to eq(["#{date_prefix}-007", "#{date_prefix}-008"])
   end
 
   private def invoice_rows

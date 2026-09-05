@@ -179,4 +179,19 @@ RSpec.describe InvoiceExports::MoneyForwardCsv do
       end
     end
   end
+
+  context 'with a specified starting invoice number' do
+    subject(:invoice_csv) do
+      described_class.new(
+        conference:,
+        sponsorships: [sponsorship],
+        invoice_date: Date.new(2026, 8, 16),
+        starting_invoice_number: 42,
+      )
+    end
+
+    it 'uses the specified number with zero padding' do
+      expect(invoice_csv.rows.fetch(1).fetch(6)).to eq('20260816-042')
+    end
+  end
 end
