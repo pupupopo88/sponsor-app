@@ -7,7 +7,8 @@ class SponsorshipAssetFilesController < ApplicationController
   before_action :set_asset_file, only: [:show, :update, :initiate_update]
 
   def show
-    redirect_to @asset_file.download_url, allow_other_host: true
+    disposition = params[:disposition] == 'inline' ? :inline : :attachment
+    redirect_to @asset_file.download_url(disposition:), allow_other_host: true
   end
 
   def update = super

@@ -114,6 +114,7 @@ class SponsorshipsController < ApplicationController
       :profile,
       :asset_file_id,
       :asset_file_id_to_copy,
+      :logo_confirmation,
       :booth_requested,
       :print_sticker_sponsor_requested,
       :fallback_option,

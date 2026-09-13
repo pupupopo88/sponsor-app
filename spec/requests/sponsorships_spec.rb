@@ -29,6 +29,47 @@ RSpec.describe 'Sponsorships', type: :request do
     end
   end
 
+  describe 'updating sponsor information' do
+    let(:sponsorship) { FactoryBot.create(:sponsorship, conference:, plan: conference.plans.first) }
+
+    before do
+      allow(ProcessSponsorshipEditJob).to receive(:perform_later)
+      token = FactoryBot.create(:session_token, email: sponsorship.contact.email)
+      get claim_user_session_path(token.handle)
+    end
+
+    it 'does not save an update without logo confirmation' do
+      original_name = sponsorship.name
+      patch user_conference_sponsorship_path(conference), params: {sponsorship: {name: 'Updated name'}}
+
+      expect(response).to have_http_status(:ok)
+      expect(sponsorship.reload.name).to eq(original_name)
+      confirmation = response.parsed_body.at_css('input[type="checkbox"][name="sponsorship[logo_confirmation]"]')
+      expect(confirmation['checked']).to be_nil
+      expect(response.parsed_body.at_css('.alert-danger').text).to include(Sponsorship.human_attribute_name(:logo_confirmation))
+    end
+
+    it 'saves an update when logo confirmation is submitted' do
+      patch user_conference_sponsorship_path(conference), params: {sponsorship: {name: 'Updated name', logo_confirmation: '1'}}
+
+      expect(response).to redirect_to(user_conference_sponsorship_path(conference, conference:))
+      expect(sponsorship.reload.name).to eq('Updated name')
+      expect(ProcessSponsorshipEditJob).to have_received(:perform_later)
+    end
+
+    it 'rejects non-Latin information even with logo confirmation' do
+      original_name = sponsorship.name
+      original_profile = sponsorship.profile
+      patch user_conference_sponsorship_path(conference), params: {sponsorship: {name: '株式会社Example', profile: '紹介文', logo_confirmation: '1'}}
+
+      expect(response).to have_http_status(:ok)
+      expect(sponsorship.reload.name).to eq(original_name)
+      expect(sponsorship.profile).to eq(original_profile)
+      errors = response.parsed_body.at_css('.alert-danger').text
+      expect(errors).to include(Sponsorship.human_attribute_name(:name), Sponsorship.human_attribute_name(:profile))
+    end
+  end
+
   describe 'copying a previous application' do
     let(:previous_conference) { FactoryBot.create(:conference, :full) }
     let(:previous_sponsorship) { FactoryBot.create(:sponsorship, conference: previous_conference, plan: previous_conference.plans.first) }
