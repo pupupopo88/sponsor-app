@@ -1,9 +1,7 @@
 import * as React from "react";
 import { useState, useRef, useImperativeHandle, forwardRef } from "react";
 
-import AssetFileUploader, {
-  UploadProgress,
-} from "./AssetFileUploader";
+import AssetFileUploader, { UploadProgress } from "./AssetFileUploader";
 
 interface UploadState {
   uploader?: AssetFileUploader;
@@ -30,24 +28,23 @@ type Props = {
 
 const AssetFileForm = forwardRef<AssetFileFormAPI, Props>(
   (props, ref) => {
-    const [needUpload, setNeedUpload] = useState(props.needUpload || !props.existingFileId);
+    const [needUpload, setNeedUpload] = useState(
+      props.needUpload || !props.existingFileId,
+    );
     const [willReplace, setWillReplace] = useState(false);
     const [willRemove, setWillRemove] = useState(false);
     const [uploadState, setUploadState] = useState<UploadState | undefined>(
       undefined,
     );
     const [file, setFile] = useState<File | null>(null);
-    const [filename, setFilename] = useState<string | null>(null);
-    const formRef = useRef<HTMLFormElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const uploadPromiseRef = useRef<Promise<string | null> | null>(null);
     const cachedResultRef = useRef<string | null | undefined>(undefined);
 
     const startUpload = async (): Promise<string | null> => {
       if (willRemove) return "";
-      if (!needUpload && !props.needUpload)
-        return props.existingFileId || "";
-      const form = formRef.current;
-      if (!(form && form.reportValidity())) {
+      if (!needUpload && !props.needUpload) return props.existingFileId || "";
+      if (!fileInputRef.current?.reportValidity()) {
         console.log("Form is invalid, cannot start upload");
         return null;
       }
@@ -67,8 +64,13 @@ const AssetFileForm = forwardRef<AssetFileFormAPI, Props>(
       });
       setUploadState({ uploader, progress: null });
 
-      await uploader.perform();
-      return uploader.fileId || null;
+      try {
+        await uploader.perform();
+        return uploader.fileId || null;
+      } catch (error) {
+        setUploadState(undefined);
+        throw error;
+      }
     };
 
     const ensureUpload = async (): Promise<string | null> => {
@@ -105,7 +107,8 @@ const AssetFileForm = forwardRef<AssetFileFormAPI, Props>(
       [file, needUpload, willRemove, props.existingFileId, props.needUpload],
     );
 
-    const onReuploadClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const onReuploadClick = () => {
+      cachedResultRef.current = undefined;
       setNeedUpload(true);
       setWillReplace(true);
     };
@@ -115,7 +118,7 @@ const AssetFileForm = forwardRef<AssetFileFormAPI, Props>(
       setNeedUpload(false);
       setWillReplace(false);
       setFile(null);
-      setFilename(null);
+      cachedResultRef.current = undefined;
       props.onFileChange?.(null);
     };
 
@@ -132,11 +135,9 @@ const AssetFileForm = forwardRef<AssetFileFormAPI, Props>(
     };
 
     const onFileSelection = (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (!(e.target.files && e.target.files[0])) return;
-      const selectedFile = e.target.files[0];
-      console.log("Selected file:", selectedFile);
+      const selectedFile = e.target.files?.[0] ?? null;
+      cachedResultRef.current = undefined;
       setFile(selectedFile);
-      setFilename(selectedFile.name);
       props.onFileChange?.(selectedFile);
     };
 
@@ -145,6 +146,7 @@ const AssetFileForm = forwardRef<AssetFileFormAPI, Props>(
         <div>
           <span className="text-muted mr-2">File will be removed on save.</span>
           <button
+            type="button"
             className="btn btn-secondary btn-sm"
             onClick={onUndoRemoveClick}
           >
@@ -164,15 +166,14 @@ const AssetFileForm = forwardRef<AssetFileFormAPI, Props>(
 
       return (
         <div>
-          <form action="#" ref={formRef}>
-            <input
-              type="file"
-              onChange={onFileSelection}
-              required={props.needUpload}
-              accept={props.accept}
-              disabled={!!uploadState}
-            />
-          </form>
+          <input
+            ref={fileInputRef}
+            type="file"
+            onChange={onFileSelection}
+            required={props.needUpload}
+            accept={props.accept}
+            disabled={!!uploadState}
+          />
           {progressPercentage !== null && (
             <div className="mt-2">
               <div className="progress" style={{ height: "25px" }}>
@@ -191,6 +192,7 @@ const AssetFileForm = forwardRef<AssetFileFormAPI, Props>(
           )}
           {willReplace && !uploadState && (
             <button
+              type="button"
               className="btn btn-secondary btn-sm mt-1"
               onClick={onCancelClick}
             >
@@ -202,11 +204,16 @@ const AssetFileForm = forwardRef<AssetFileFormAPI, Props>(
     } else {
       return (
         <div>
-          <button className="btn btn-info" onClick={onReuploadClick}>
+          <button
+            type="button"
+            className="btn btn-info"
+            onClick={onReuploadClick}
+          >
             Replace
           </button>
           {props.removable && (
             <button
+              type="button"
               className="btn btn-danger btn-sm ml-2"
               onClick={onRemoveClick}
             >
