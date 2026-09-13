@@ -143,9 +143,7 @@ class SponsorshipsController < ApplicationController
     return {} if params[:sponsorship_id_to_copy].blank?
     return {} unless session[:sponsorship_ids]&.include?(params[:sponsorship_id_to_copy].to_i)
 
-    src = Sponsorship.find_by(id: params[:sponsorship_id_to_copy])
-    return {} unless src
-
-    src.attributes_for_copy
+    @copied_sponsorship = current_available_sponsorships.find_by(id: params[:sponsorship_id_to_copy])
+    @copied_sponsorship&.attributes_for_copy || {}
   end
 end

@@ -1,5 +1,40 @@
+function initializeBillingContact(form: Element, section: HTMLElement) {
+  const checkbox = section.querySelector<HTMLInputElement>(
+    'input[type="checkbox"]',
+  )!;
+  const fieldset = section.querySelector("fieldset")!;
+  const fields = ["email", "address", "organization", "unit", "name"].map(
+    (attribute) => {
+      const primary = form.querySelector<HTMLInputElement>(
+        `[name="sponsorship[contact_attributes][${attribute}]"]`,
+      )!;
+      const alternate = section.querySelector<HTMLInputElement>(
+        `[name="sponsorship[alternate_billing_contact_attributes][${attribute}]"]`,
+      )!;
+      // Existing billing details and fields edited by the user must remain independent.
+      let followsPrimary = alternate.value === "";
+      alternate.addEventListener("input", () => {
+        followsPrimary = false;
+      });
+      const sync = () => {
+        if (checkbox.checked && followsPrimary) alternate.value = primary.value;
+      };
+      primary.addEventListener("input", sync);
+      primary.addEventListener("change", sync);
+      return sync;
+    },
+  );
+
+  const update = () => {
+    fieldset.classList.toggle("d-none", !checkbox.checked);
+    fieldset.disabled = !checkbox.checked;
+    fields.forEach((sync) => sync());
+  };
+  checkbox.addEventListener("change", update);
+  update();
+}
+
 document.addEventListener("DOMContentLoaded", () => {
-  console.log("DOMContentLoaded");
   document.querySelectorAll(".sponsorships_form").forEach((formElem) => {
     formElem
       .querySelectorAll("select.sponsorship_id_to_copy_selector")
@@ -13,26 +48,8 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
     formElem
-      .querySelectorAll(".sponsorships_form_billing_contact")
-      .forEach((elem) => {
-        const checkbox = elem.querySelector(
-          ".form-check input[type=checkbox]",
-        ) as HTMLInputElement;
-        const fieldset = elem.querySelector("fieldset") as HTMLFieldSetElement;
-
-        const handleChange = (e?: Event) => {
-          if (checkbox.checked) {
-            fieldset.classList.remove("d-none");
-            fieldset.disabled = false;
-          } else {
-            fieldset.classList.add("d-none");
-            fieldset.disabled = true;
-          }
-        };
-        checkbox.addEventListener("change", handleChange);
-        checkbox.addEventListener("click", handleChange);
-        handleChange();
-      });
+      .querySelectorAll<HTMLElement>(".sponsorships_form_billing_contact")
+      .forEach((section) => initializeBillingContact(formElem, section));
 
     const calculateTotalAttendees = () => {
       const totalElem = formElem.querySelector(
@@ -145,9 +162,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     formElem
-      .querySelectorAll<HTMLElement>(
-        ".sponsorships_form_fallback_section",
-      )
+      .querySelectorAll<HTMLElement>(".sponsorships_form_fallback_section")
       .forEach((section) => {
         const fallbackOptionSelect = section.querySelector<HTMLSelectElement>(
           'select[name="sponsorship[fallback_option]"]',

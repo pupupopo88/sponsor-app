@@ -145,6 +145,7 @@ ja:
         header: '過去の申込情報を利用する'
         explanation: '過去の申込情報を利用することができます。下記より既存のスポンサーシップ申込を選択してください。'
         login_required: '過去の申込情報を利用するにはログインが必要です。'
+        applied: '過去の申込情報を反映しました。現在の内容と提出要件を必ず確認してください。'
       contact: '連絡先'
       email_help: "主のメールアドレスにはメーリングリストの利用を推奨します。その場合, 担当者のアドレスは CC に指定ください。次回開催時など継続しての申込の際、過去の情報を参照しやすくなります。"
       email_cc_help: '上記の E メールアドレスの他に、各種連絡において送信先として加えるアドレス (CC) を入力してください。複数のアドレスをカンマ (,) 区切りで入力できます。尚、CC 先のアドレスではスポンサーポータルへの新規ログインはできません。'
@@ -152,6 +153,7 @@ ja:
       # Please provide billing information for invoicing. If you have any special requests, use the additional note field below. Note that we will issue invoices in PDF format via email; No hardcopy will be sent.'
       billing_help: "請求書発行のための請求情報をご提供ください。なお、請求書は PDF 形式でメールにて送信し、郵送は行いません。また、いただいた連絡事項が対応可能な場合、こちらから了承のお返事は差し上げませんのでご了承ください。"
       specify_alternate_billing_contact: '請求に関して別の連絡・送付先を指定する'
+      alternate_billing_contact_help: '主連絡先の内容が空欄へ自動的にコピーされます。異なる項目だけ修正し、同じ項目はコピーされた正式な内容をそのまま残してください。'
       billing_request_help: '請求に関しての要求、特に特別な契約や申込書のやり取りが必要、請求期日に関するご要望がある場合などがあれば、その旨ご記入ください。'
       plan: 'スポンサープラン'
       plans: 'プラン一覧:'
