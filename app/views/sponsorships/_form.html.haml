@@ -20,6 +20,9 @@
     .form-group
       %h2= t('.header', name: conference.name)
       = desc.head_html&.html_safe
+      %p.text-muted.mt-2
+        %span.sponsorships_form_required_mark{aria: {hidden: true}}
+        = t('.required_fields_note')
 
   - if !sponsorship.persisted? && current_available_sponsorships
     %section.py-3
@@ -112,13 +115,13 @@
       %h3= t('.plan')
       = desc.plan_help_html&.html_safe
 
-    %fieldset{disabled: @sponsorship.persisted? && @sponsorship.accepted?}
+    %fieldset{disabled: sponsorship.persisted? && sponsorship.accepted?}
       .form-group.sponsorships_form_plans
         %h5= t('.plans')
         - conference.plans.each do |plan|
           .form-check
             %label.form-check-label
-              = form.radio_button :plan_id, plan.id, checked: plan.id == @sponsorship.plan_id, class: 'form-check-input', disabled: !plan.available? && plan.id != @sponsorship.plan_id, data: {booth: plan.booth_eligible? ? '1' : '0', print_sticker_sponsor: plan.print_sticker_sponsor_eligible? ? '1' : '0', words_limit_help: t('.plan_explanation.words_limit', count: plan.words_limit), acceptance_help: plan.auto_acceptance ? t('.plan_explanation.auto_acceptance', plan: plan.name) : t('.plan_explanation.not_auto_acceptance', plan: plan.name), guests: plan.number_of_guests, plan_name: plan.name}
+              = form.radio_button :plan_id, plan.id, checked: plan.id == sponsorship.plan_id, class: 'form-check-input', required: !conference.no_plan_allowed, disabled: !plan.available? && plan.id != sponsorship.plan_id, data: {booth: conference.booth_capacity > 0 && plan.booth_eligible? ? '1' : '0', print_sticker_sponsor: plan.print_sticker_sponsor_eligible? ? '1' : '0', words_limit_help: t('.plan_explanation.words_limit', count: plan.words_limit), acceptance_help: plan.auto_acceptance ? t('.plan_explanation.auto_acceptance', plan: plan.name) : t('.plan_explanation.not_auto_acceptance', plan: plan.name), guests: plan.number_of_guests, plan_name: plan.name}
               = plan.name
               %small<
                 #{plan.price_text}
@@ -135,10 +138,10 @@
               - when plan.closed?
                 %small.badge.badge-danger= t('.plan_closed')
 
-        - if @conference.no_plan_allowed || (@sponsorship.persisted? && @sponsorship.plan_id == nil)
+        - if conference.no_plan_allowed || (sponsorship.persisted? && sponsorship.plan_id == nil)
           .form-check
             %label.form-check-label
-              = form.radio_button :plan_id, '', checked: @sponsorship.plan_id == nil && (@sponsorship.persisted? || @sponsorship.errors.any?), class: 'form-check-input', data: {other: '1', guests: 0, plan_name: 'Other'}
+              = form.radio_button :plan_id, '', checked: sponsorship.plan_id == nil && (sponsorship.persisted? || sponsorship.errors.any?), class: 'form-check-input', data: {other: '1', guests: 0, plan_name: 'Other'}
               Other
 
     = form.fields_for :customization_request do |request_form|
@@ -146,22 +149,22 @@
         = request_form.label :body
         = request_form.text_area :body, class: 'form-control sponsorships_form_customization_request'
 
-  %section.py-2{class: @conference.booth_capacity > 0 ? '' : 'd-none'}
+  %section.py-2{class: conference.booth_capacity > 0 ? '' : 'd-none'}
     .form-group
       %h3= t('.booth')
       = desc.booth_help_html&.html_safe
 
-    .form-group.sponsorships_form_booth_request
-      %p= t('.booth_request_help')
+    %fieldset.form-group.sponsorships_form_booth_request
+      %legend.h6= t('.booth_request_help')
       .form-check
-        = form.radio_button :booth_requested, true, checked: sponsorship.booth_requested == true, class: 'form-check-input', required: true
+        = form.radio_button :booth_requested, true, checked: sponsorship.booth_requested == true, class: 'form-check-input', required: conference.booth_capacity > 0
         = form.label :booth_requested_true, t('.booth_request_yes'), class: 'form-check-label'
       .form-check
-        = form.radio_button :booth_requested, false, checked: sponsorship.booth_requested == false, class: 'form-check-input', required: true
+        = form.radio_button :booth_requested, false, checked: sponsorship.booth_requested == false, class: 'form-check-input', required: conference.booth_capacity > 0
         = form.label :booth_requested_false, t('.booth_request_no'), class: 'form-check-label'
       %small.d-none.sponsorships_form_booth_request_uneligible.form-text.text-small.text-info= t('.booth_uneligible_plan_selected', plans: conference.plans.select(&:booth_eligible?).map(&:name).join(', '))
 
-  %section.py-2{class: @conference.print_sticker_sponsor_capacity > 0 ? '' : 'd-none'}
+  %section.py-2{class: conference.print_sticker_sponsor_capacity > 0 ? '' : 'd-none'}
     .form-group
       %h3= t('.print_sticker_sponsor')
       = desc.print_sticker_sponsor_help_html&.html_safe
@@ -218,7 +221,7 @@
 
   %section.py-2
     .form-group
-      %h3= t('.logo')
+      %h3.sponsorships_form_logo_heading= t('.logo')
 
       %p= t('.logo_help_html')
 
@@ -330,7 +333,7 @@
 
       .form-check
         = form.check_box :policy_agreement, class: 'form-check-input', required: true
-        = form.label :policy_agreement, "", class: 'form-check-label'
+        = form.label :policy_agreement, class: 'form-check-label'
 
     .form-group
       = form.submit t('.submit'), class: 'btn btn-primary', data: {disable_with: false}

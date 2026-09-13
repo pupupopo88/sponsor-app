@@ -11,6 +11,15 @@ RSpec.describe 'Sponsorships', type: :request do
       expect(response.parsed_body.css('input[name="sponsorship[booth_requested]"][checked]')).to be_empty
     end
 
+    it 'does not require hidden booth inputs when the conference has no booths' do
+      conference.update!(booth_capacity: 0)
+      conference.plans.first.update!(booth_size: 1)
+      get new_user_conference_sponsorship_path(conference)
+
+      expect(response.parsed_body.css('input[name="sponsorship[booth_requested]"][required]')).to be_empty
+      expect(response.parsed_body.css('input[name="sponsorship[plan_id]"][data-booth="1"]')).to be_empty
+    end
+
     [nil, 'true', 'false'].each do |choice|
       it "preserves #{choice.inspect} after a failed submission" do
         plan = conference.plans.first

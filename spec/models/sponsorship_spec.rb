@@ -280,6 +280,13 @@ RSpec.describe Sponsorship, type: :model do
       expect(sponsorship.errors[:booth_requested]).to be_empty
     end
 
+    it 'does not require a choice when the conference has no booths' do
+      conference.update!(booth_capacity: 0)
+      sponsorship.valid?(:update_by_user)
+      expect(sponsorship.booth_requested).to be false
+      expect(sponsorship.errors[:booth_requested]).to be_empty
+    end
+
     it 'still rejects a booth request for an ineligible plan' do
       plan.update!(booth_size: 0)
       sponsorship.booth_requested = true
