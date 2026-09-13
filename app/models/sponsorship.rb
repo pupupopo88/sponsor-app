@@ -302,7 +302,7 @@ class Sponsorship < ApplicationRecord
   end
 
   private def default_booth_request
-    self.booth_requested = false if booth_requested.nil? && !plan&.booth_eligible?
+    self.booth_requested = false if booth_requested.nil? && (conference.booth_capacity <= 0 || !plan&.booth_eligible?)
   end
 
   private def validate_booth_eligibility

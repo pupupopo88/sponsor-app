@@ -159,6 +159,18 @@ h2
   label
     font-weight: 600
 
+.sponsorships_form
+  .form-group:has(:is(input, textarea, select)[required]) > label::after,
+  .form-group:has(:is(input, textarea, select)[required]) > .field_with_errors > label::after,
+  .form-check:has(input[required]:not([type="radio"])) > label::after,
+  .form-check:has(input[required]:not([type="radio"])) > .field_with_errors > label::after,
+  .sponsorships_form_plans:has(input[required]) > h5::after,
+  .sponsorships_form_booth_request:has(input[required]) > legend::after,
+  .sponsorships_form_logo_heading::after,
+  .sponsorships_form_required_mark::after
+    content: " *"
+    color: $danger
+
 .form-text
   margin-top: 0.75rem
 
