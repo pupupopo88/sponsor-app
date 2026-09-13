@@ -90,6 +90,11 @@ class Sponsorship < ApplicationRecord
   validate :validate_word_count, on: :update_by_user
   validate :validate_no_plan_allowance, on: :update_by_user
   validate :validate_fallback_option, on: :update_by_user
+  validates_each :name, :profile, on: :update_by_user do |record, attribute, value|
+    unless value.to_s.unicode_normalize(:nfc).match?(/\A[\p{Latin}\p{Common}\p{Inherited}]*\z/)
+      record.errors.add(attribute, :must_use_latin_characters)
+    end
+  end
   validate :policy_agreement
 
   accepts_nested_attributes_for :contact, allow_destroy: true, reject_if: ->(attrs) { attrs['kind'].present? }

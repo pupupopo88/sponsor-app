@@ -1,3 +1,29 @@
+const LATIN_TEXT_PATTERN =
+  /^[\p{Script=Latin}\p{Script=Common}\p{Script=Inherited}]*$/u;
+
+function initializeSponsorInformation(section: HTMLElement) {
+  const fields = section.querySelectorAll<
+    HTMLInputElement | HTMLTextAreaElement
+  >('input[name="sponsorship[name]"], textarea[name="sponsorship[profile]"]');
+  const warning = section.querySelector<HTMLElement>(
+    ".sponsorships_form_info__warning",
+  );
+  const validate = () => {
+    let hasInvalidText = false;
+    fields.forEach((field) => {
+      const valid = LATIN_TEXT_PATTERN.test(field.value.normalize("NFC"));
+      field.setCustomValidity(valid ? "" : section.dataset.latinTextError!);
+      hasInvalidText ||= !valid;
+    });
+    warning?.classList.toggle("d-none", !hasInvalidText);
+  };
+  fields.forEach((field) => {
+    field.addEventListener("input", validate);
+    field.addEventListener("change", validate);
+  });
+  validate();
+}
+
 function initializeBillingContact(form: Element, section: HTMLElement) {
   const checkbox = section.querySelector<HTMLInputElement>(
     'input[type="checkbox"]',
@@ -363,40 +389,8 @@ document.addEventListener("DOMContentLoaded", () => {
           });
       });
 
-    const ENGLISH_REGEX =
-      /^(?:[\p{Script=Latin}\p{Script=Zyyy}\p{Sc}\p{Sk}\p{Sm}\p{So}])*$/u;
-    formElem.querySelectorAll(".sponsorships_form_info").forEach((elem) => {
-      elem
-        .querySelectorAll<HTMLInputElement>(
-          'input[name="sponsorship[name]"], textarea[name="sponsorship[profile]"]',
-        )
-        .forEach((inputElem) => {
-          const onChange = () => {
-            const warningsToShow = new Map<string, boolean>();
-
-            if (!ENGLISH_REGEX.test(inputElem.value)) {
-              warningsToShow.set("english", true);
-            }
-
-            const warningElems = formElem.querySelectorAll<HTMLElement>(
-              ".sponsorships_form_info__warning",
-            );
-
-            warningElems.forEach((w) => {
-              if (warningsToShow.has(w.dataset.warningKind || "")) {
-                w.classList.remove("d-none");
-                w.querySelectorAll("input").forEach((i) => (i.required = true));
-              } else {
-                w.classList.add("d-none");
-                w.querySelectorAll("input").forEach(
-                  (i) => (i.required = false),
-                );
-              }
-            });
-          };
-          inputElem.addEventListener("input", onChange);
-          inputElem.addEventListener("change", onChange);
-        });
-    });
+    formElem
+      .querySelectorAll<HTMLElement>(".sponsorships_form_info")
+      .forEach(initializeSponsorInformation);
   });
 });

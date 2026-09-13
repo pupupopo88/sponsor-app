@@ -130,3 +130,34 @@ test("booth choice stays explicit and controls fallback choices", async ({
   await expect(no).not.toBeChecked();
   await expect(fallback).toHaveClass(/d-none/);
 });
+
+test("Latin text warning reflects both fields, including prefilled text", async ({
+  page,
+}) => {
+  await initializeForm(
+    page,
+    `
+    <section class="sponsorships_form_info" data-latin-text-error="Use Latin characters">
+      <input name="sponsorship[name]" value="株式会社Example">
+      <textarea name="sponsorship[profile]">English profile</textarea>
+      <div class="sponsorships_form_info__warning d-none"></div>
+    </section>`,
+  );
+  const name = page.locator("input");
+  const profile = page.locator("textarea");
+  const warning = page.locator(".sponsorships_form_info__warning");
+  await expect(warning).not.toHaveClass(/d-none/);
+  await profile.fill("Another English profile");
+  await expect(warning).not.toHaveClass(/d-none/);
+  await profile.fill("紹介文");
+  await name.fill("Cafe\u0301 & Co.");
+  await expect(warning).not.toHaveClass(/d-none/);
+  await expect(name).toHaveJSProperty("validationMessage", "");
+  await expect(profile).toHaveJSProperty(
+    "validationMessage",
+    "Use Latin characters",
+  );
+  await profile.fill("English profile\nwith punctuation & symbols.");
+  await expect(warning).toHaveClass(/d-none/);
+  await expect(profile).toHaveJSProperty("validationMessage", "");
+});
