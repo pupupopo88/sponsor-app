@@ -165,6 +165,7 @@ RSpec.describe Sponsorship, type: :model do
       eligible_plan = FactoryBot.create(:plan, conference:, print_sticker_sponsor_eligible: true)
       sponsorship = FactoryBot.build(:sponsorship, conference:, plan: eligible_plan, print_sticker_sponsor_requested: true)
       sponsorship.policy_agreement = true
+      sponsorship.logo_confirmation = true
 
       expect(sponsorship).to be_valid(:update_by_user)
     end
@@ -174,6 +175,7 @@ RSpec.describe Sponsorship, type: :model do
       ineligible_plan = FactoryBot.create(:plan, conference:, print_sticker_sponsor_eligible: false)
       sponsorship = FactoryBot.build(:sponsorship, conference:, plan: ineligible_plan, print_sticker_sponsor_requested: true)
       sponsorship.policy_agreement = true
+      sponsorship.logo_confirmation = true
 
       expect(sponsorship).not_to be_valid(:update_by_user)
       expect(sponsorship.errors.of_kind?(:print_sticker_sponsor_requested, :not_eligible)).to be true
@@ -183,6 +185,7 @@ RSpec.describe Sponsorship, type: :model do
       FactoryBot.create(:form_description, conference:)
       sponsorship = FactoryBot.build(:sponsorship, conference:, plan:, name: '株式会社Example')
       sponsorship.policy_agreement = true
+      sponsorship.logo_confirmation = true
 
       expect(sponsorship).not_to be_valid(:update_by_user)
       expect(sponsorship.errors.of_kind?(:name, :must_use_latin_characters)).to be true
@@ -192,6 +195,7 @@ RSpec.describe Sponsorship, type: :model do
       FactoryBot.create(:form_description, conference:)
       sponsorship = FactoryBot.build(:sponsorship, conference:, plan:, name: "Cafe\u0301 & Co.")
       sponsorship.policy_agreement = true
+      sponsorship.logo_confirmation = true
 
       expect(sponsorship).to be_valid(:update_by_user)
     end
@@ -208,9 +212,44 @@ RSpec.describe Sponsorship, type: :model do
       FactoryBot.create(:form_description, conference:)
       sponsorship = FactoryBot.build(:sponsorship, conference:, plan:, name: 'Example Ω Пример')
       sponsorship.policy_agreement = true
+      sponsorship.logo_confirmation = true
 
       expect(sponsorship).not_to be_valid(:update_by_user)
       expect(sponsorship.errors.of_kind?(:name, :must_use_latin_characters)).to be true
+    end
+
+    it 'requires confirmation of the uploaded logo' do
+      FactoryBot.create(:form_description, conference:)
+      sponsorship = FactoryBot.build(:sponsorship, conference:, plan:)
+      sponsorship.policy_agreement = true
+
+      expect(sponsorship).not_to be_valid(:update_by_user)
+      expect(sponsorship.errors.of_kind?(:logo_confirmation, :accepted)).to be true
+    end
+  end
+
+  describe 'logo confirmation' do
+    let(:conference) { FactoryBot.create(:conference, :full) }
+    let(:sponsorship) { FactoryBot.build(:sponsorship, conference:, plan: conference.plans.first) }
+
+    [nil, false, '0', 'yes'].each do |value|
+      it "rejects #{value.inspect} as confirmation" do
+        sponsorship.logo_confirmation = value
+        sponsorship.valid?(:update_by_user)
+        expect(sponsorship.errors.of_kind?(:logo_confirmation, :accepted)).to be true
+      end
+    end
+
+    [true, '1'].each do |value|
+      it "accepts #{value.inspect} as confirmation" do
+        sponsorship.logo_confirmation = value
+        sponsorship.valid?(:update_by_user)
+        expect(sponsorship.errors[:logo_confirmation]).to be_empty
+      end
+    end
+
+    it 'does not require confirmation for organizer updates' do
+      expect(sponsorship).to be_valid
     end
   end
 

@@ -95,6 +95,7 @@ class Sponsorship < ApplicationRecord
       record.errors.add(attribute, :must_use_latin_characters)
     end
   end
+  validates :logo_confirmation, acceptance: {allow_nil: false}, on: :update_by_user
   validate :policy_agreement
 
   accepts_nested_attributes_for :contact, allow_destroy: true, reject_if: ->(attrs) { attrs['kind'].present? }

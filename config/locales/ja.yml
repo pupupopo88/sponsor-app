@@ -12,6 +12,7 @@ ja:
         fallback_option: '優先順位'
         number_of_additional_attendees: '追加Attendeeチケット枚数'
         policy_agreement: 'ポリシーへ同意する'
+        logo_confirmation: 'ロゴ画像の確認'
 
       sponsorship/note: &note
         body: 'その他の連絡事項'
@@ -205,6 +206,23 @@ ja:
         Webサイトや会場にて掲示するため、ロゴファイルをアップロードしてください。
         ロゴファイル画像には規定の仕様形式がございます。
         <a href="https://esa-pages.io/p/sharing/14929/posts/846/ce6470e4fec9d63ae08e.html">テンプレートREADME</a>をご確認の上、提出をお願いいたします。
+      logo_preview_alt: 'アップロードするロゴのプレビュー'
+      logo_aspect_ratio_error: 'ロゴ画像は縦横比が1:1の正方形にしてください。'
+      logo_aspect_ratio_valid: '縦横比は1:1です。'
+      logo_dimensions_label: '画像サイズ'
+      logo_format_label: '画像形式'
+      logo_image_load_error: '画像を読み込めませんでした。別のPNGまたはJPEG画像を選択してください。'
+      logo_missing_dpi: 'DPI情報がありません'
+      logo_required_dimensions: '2,894 × 2,894 pxにしてください'
+      logo_required_dpi: '350 dpiにしてください'
+      logo_resolution_label: '解像度'
+      logo_rgb_error: 'カラーモードはRGBにしてください。'
+      logo_transparency_error: '透過情報・アルファチャンネルを含まない画像にしてください。'
+      logo_transparency_valid: '透過情報・アルファチャンネルは含まれていません。'
+      logo_rgb_valid: 'カラーモードはRGBです。'
+      logo_validation_checking: '画像の仕様を確認しています…'
+      logo_validation_error: 'ロゴ画像が仕様を満たしていません。'
+      logo_confirmation: 'アップロードした画像が、意図したロゴデータであり、不要な要素を含んでいないことを確認しました'
       tickets: 'Attendee チケット'
       tickets_included_in_plan: 'スポンサープランに含まれている枚数'
       tickets_additionally_request: '追加する枚数'
@@ -220,14 +238,6 @@ ja:
           body1: 'サイト掲載情報は、サービス名や会社名も含めて英語（ラテン文字）で入力してください。'
           body2: '会社名と紹介文を修正するまで、このフォームは送信できません。'
           input_error: '英語（ラテン文字）で入力してください。'
-        zip_asset:
-          header: '.zip ファイルの要件を確認してください'
-          item0: '.zip ファイルは暗号化されていないこと'
-          item1: '.zip ファイルにはベクター形式ファイル (.ai, .svg, .pdf) が含まれていること'
-          item2: '.zip ファイルには必要なガイドラインファイルなど含まれていること (該当する場合)'
-          item3: '複数のロゴが含まれる場合: 次の [その他の連絡事項] 欄でファイル名を指定してください'
-          acknowledge: '上記の要件を確認しました。'
-
     closed:
       title: 受付終了
       header: '申し込み期間ではありません'
