@@ -89,9 +89,15 @@ document.addEventListener("DOMContentLoaded", () => {
     calculateTotalAttendees();
 
     formElem.querySelectorAll(".sponsorships_form_plans").forEach((elem) => {
-      const boothCheckbox = formElem.querySelector(
-        ".sponsorships_form_booth_request input[type=checkbox]",
-      ) as HTMLInputElement;
+      const boothRequestRadios = formElem.querySelectorAll<HTMLInputElement>(
+        ".sponsorships_form_booth_request input[type=radio]",
+      );
+      const boothYesRadio = formElem.querySelector<HTMLInputElement>(
+        '.sponsorships_form_booth_request input[type=radio][value="true"]',
+      );
+      const boothNoRadio = formElem.querySelector<HTMLInputElement>(
+        '.sponsorships_form_booth_request input[type=radio][value="false"]',
+      );
       const uneligibleHelpTextElem = formElem.querySelector(
         ".sponsorships_form_booth_request_uneligible",
       ) as Element;
@@ -101,24 +107,26 @@ document.addEventListener("DOMContentLoaded", () => {
       const printStickerSponsorHelpTextElem = formElem.querySelector(
         ".sponsorships_form_print_sticker_sponsor_uneligible",
       ) as Element | null;
-      const customizationRequestField = document.querySelector(
+      const customizationRequestField = formElem.querySelector(
         ".sponsorships_form_customization_request",
       ) as HTMLTextAreaElement;
-      const profileFieldHelpElem = document.querySelector(
+      const profileFieldHelpElem = formElem.querySelector(
         ".sponsorships_form_profile_help",
       ) as Element;
-      const acceptanceHelpElem = document.querySelector(
+      const acceptanceHelpElem = formElem.querySelector(
         ".sponsorships_acceptance_help",
       ) as Element;
 
       const handleChange = (e: HTMLInputElement | null) => {
         if (e?.dataset.booth == "1") {
           uneligibleHelpTextElem.classList.add("d-none");
-          boothCheckbox.disabled = false;
+          boothRequestRadios.forEach((radio) => (radio.disabled = false));
         } else {
           uneligibleHelpTextElem.classList.remove("d-none");
-          boothCheckbox.checked = false;
-          boothCheckbox.disabled = true;
+          if (boothYesRadio) boothYesRadio.checked = false;
+          if (boothNoRadio) boothNoRadio.checked = true;
+          if (boothYesRadio) boothYesRadio.disabled = true;
+          if (boothNoRadio) boothNoRadio.disabled = false;
         }
 
         if (printStickerSponsorCheckbox && printStickerSponsorHelpTextElem) {
@@ -156,6 +164,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const planRadio = planRadioElem as HTMLInputElement;
         planRadio.addEventListener("change", (e) => {
           calculateTotalAttendees();
+          boothRequestRadios.forEach((radio) => (radio.checked = false));
           handleChange(e.target as HTMLInputElement);
         });
       });
@@ -173,11 +182,17 @@ document.addEventListener("DOMContentLoaded", () => {
           const selectedPlanElem = formElem.querySelector<HTMLInputElement>(
             ".sponsorships_form_plans input[type=radio]:checked",
           );
-          const boothCheckbox = formElem.querySelector<HTMLInputElement>(
-            ".sponsorships_form_booth_request input[type=checkbox]",
+          const boothChoice = formElem.querySelector<HTMLInputElement>(
+            ".sponsorships_form_booth_request input[type=radio]:checked",
           );
-
-          const boothRequested = boothCheckbox?.checked || false;
+          // Do not offer fallback choices until the booth preference is explicit.
+          if (!boothChoice) {
+            section.classList.add("d-none");
+            fallbackOptionSelect.required = false;
+            fallbackOptionSelect.value = "";
+            return;
+          }
+          const boothRequested = boothChoice.value === "true";
           const selectedPlanName = selectedPlanElem?.dataset.planName;
 
           let visibleCount = 0;
@@ -262,7 +277,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
           const selectedOption = fallbackOptionSelect.selectedOptions[0];
           if (!selectedOption || selectedOption.value === "") {
-            priorityList.innerHTML = "";
+            priorityList.replaceChildren();
+            priorityListSection.classList.add("d-none");
             return;
           }
 
@@ -274,14 +290,14 @@ document.addEventListener("DOMContentLoaded", () => {
           );
           const selectedPlanName = selectedPlanElem?.dataset.planName || "";
 
-          const boothCheckbox = formElem.querySelector<HTMLInputElement>(
-            ".sponsorships_form_booth_request input[type=checkbox]",
+          const boothYesRadio = formElem.querySelector<HTMLInputElement>(
+            '.sponsorships_form_booth_request input[type=radio][value="true"]',
           );
           priorityHuman.unshift(
             `{plan}${
-              boothCheckbox?.disabled
+              boothYesRadio?.disabled
                 ? ""
-                : `!${boothCheckbox?.checked ? "booth" : "no_booth"}`
+                : `!${boothYesRadio?.checked ? "booth" : "no_booth"}`
             }`,
           );
 
@@ -331,10 +347,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
         formElem
           .querySelectorAll<HTMLInputElement>(
-            ".sponsorships_form_booth_request input[type=checkbox]",
+            ".sponsorships_form_booth_request input[type=radio]",
           )
-          .forEach((boothCheckbox) => {
-            boothCheckbox.addEventListener("change", () => {
+          .forEach((boothRadio) => {
+            boothRadio.addEventListener("change", () => {
               // Reset fallback option to remind user to select again
               fallbackOptionSelect.value = "";
               const prioritySection = formElem.querySelector<HTMLElement>(
@@ -342,6 +358,7 @@ document.addEventListener("DOMContentLoaded", () => {
               );
               prioritySection?.classList.add("d-none");
               updateFallbackOptions();
+              updatePriorityHuman();
             });
           });
       });

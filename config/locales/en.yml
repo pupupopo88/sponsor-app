@@ -74,6 +74,7 @@ en:
             organization:
               taken: "There is already a sponsorship application from your organization (determined by email domain). Choose a different email address or contact us if you want to have multiple sponsorships."
             booth_requested:
+              inclusion: "must be selected"
               not_eligible: "is not eligible in your selected plan."
             print_sticker_sponsor_requested:
               not_eligible: "is not eligible in your selected plan."
@@ -182,6 +183,9 @@ en:
       plan_closed: 'Closed'
       print_sticker_sponsor: 'Print sticker sponsor'
       booth: 'Sponsor Booth'
+      booth_request_help: 'Select one of the following options.'
+      booth_request_yes: 'Request a booth'
+      booth_request_no: 'Do not request a booth'
       booth_uneligible_plan_selected: 'Your selected plan is uneligible for booths; only available in %{plans} plan'
       print_sticker_sponsor_uneligible_plan_selected: 'Your selected plan is uneligible for the print sticker sponsor option; only available in %{plans} plan'
       fallback_option: 'Configure Alternative Plan Preferences'

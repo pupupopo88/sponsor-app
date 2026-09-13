@@ -84,6 +84,7 @@ class Sponsorship < ApplicationRecord
   validate :validate_correct_plan
   validate :validate_plan_change, on: :update_by_user
   validate :validate_plan_availability, on: :update_by_user
+  validates :booth_requested, inclusion: {in: [true, false]}, on: :update_by_user
   validate :validate_booth_eligibility, on: :update_by_user
   validate :validate_print_sticker_sponsor_eligibility, on: :update_by_user
   validate :validate_word_count, on: :update_by_user
@@ -99,6 +100,7 @@ class Sponsorship < ApplicationRecord
   accepts_nested_attributes_for :note, reject_if: ->(attrs) { attrs['kind'].present? }
 
   before_validation :generate_ticket_key
+  before_validation :default_booth_request, on: :update_by_user
 
   def build_nested_attributes_associations
     build_contact unless contact
@@ -291,6 +293,10 @@ class Sponsorship < ApplicationRecord
     unless policy_agreement
       errors.add :policy_agreement, "must agree with the policy"
     end
+  end
+
+  private def default_booth_request
+    self.booth_requested = false if booth_requested.nil? && !plan&.booth_eligible?
   end
 
   private def validate_booth_eligibility
