@@ -77,3 +77,56 @@ test("existing billing details are preserved and untouched fields catch up when 
     "Changed while disabled",
   );
 });
+
+const boothForm = `
+  <div class="sponsorships_form_plans">
+    <input type="radio" name="plan" value="eligible" data-booth="1" data-plan-name="Gold" checked>
+    <input type="radio" name="plan" value="ineligible" data-booth="0" data-plan-name="Silver">
+  </div>
+  <div class="sponsorships_form_booth_request">
+    <input type="radio" name="booth" value="true" required>
+    <input type="radio" name="booth" value="false" required>
+  </div>
+  <small class="sponsorships_form_booth_request_uneligible"></small>
+  <textarea class="sponsorships_form_customization_request"></textarea>
+  <small class="sponsorships_form_profile_help"></small>
+  <small class="sponsorships_acceptance_help"></small>
+  <section class="sponsorships_form_fallback_section">
+    <select name="sponsorship[fallback_option]">
+      <option value=""></option>
+      <option value="without-booth" data-conditions='[{"booth_request":false}]' data-priority-human='["!withdraw"]'>Without booth</option>
+      <option value="with-booth" data-conditions='[{"booth_request":true}]' data-priority-human='["!withdraw"]'>With booth</option>
+    </select>
+    <div class="sponsorships_form_fallback_priority"><ol></ol></div>
+  </section>`;
+
+test("booth choice stays explicit and controls fallback choices", async ({
+  page,
+}) => {
+  await initializeForm(page, boothForm);
+  const fallback = page.locator(".sponsorships_form_fallback_section");
+  const select = fallback.locator("select");
+  const yes = page.locator('[name="booth"][value="true"]');
+  const no = page.locator('[name="booth"][value="false"]');
+  await expect(yes).not.toBeChecked();
+  await expect(no).not.toBeChecked();
+  await expect(fallback).toHaveClass(/d-none/);
+  await no.check();
+  await expect(fallback).not.toHaveClass(/d-none/);
+  await select.selectOption("without-booth");
+  await expect(
+    page.locator(".sponsorships_form_fallback_priority"),
+  ).not.toHaveClass(/d-none/);
+  await yes.check();
+  await expect(select).toHaveValue("");
+  await expect(
+    page.locator(".sponsorships_form_fallback_priority"),
+  ).toHaveClass(/d-none/);
+  await page.locator('[name="plan"][value="ineligible"]').check();
+  await expect(no).toBeChecked();
+  await expect(yes).toBeDisabled();
+  await page.locator('[name="plan"][value="eligible"]').check();
+  await expect(yes).not.toBeChecked();
+  await expect(no).not.toBeChecked();
+  await expect(fallback).toHaveClass(/d-none/);
+});

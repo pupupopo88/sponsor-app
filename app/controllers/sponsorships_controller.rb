@@ -34,7 +34,7 @@ class SponsorshipsController < ApplicationController
 
     @affiliated_organization = Organization.find_by(affiliation_code: params[:affiliation])
 
-    @sponsorship = Sponsorship.new(copied_sponsorship_attributes)
+    @sponsorship = Sponsorship.new(copied_sponsorship_attributes.merge(booth_requested: nil))
     @sponsorship.conference = @conference
     @sponsorship.build_nested_attributes_associations
   end
@@ -46,7 +46,7 @@ class SponsorshipsController < ApplicationController
     return render(plain: '404', status: :not_found) unless @conference.verify_invite_code(params[:invite_code])
     return render(:closed, status: :forbidden) if !@conference&.application_open? && !current_staff
 
-    @sponsorship = Sponsorship.new(sponsorship_params.except(:asset_file_id))
+    @sponsorship = Sponsorship.new({booth_requested: nil}.merge(sponsorship_params.except(:asset_file_id)))
 
     if sponsorship_params[:asset_file_id].present?
       asset_src = SponsorshipAssetFile

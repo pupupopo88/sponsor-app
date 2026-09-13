@@ -180,6 +180,41 @@ RSpec.describe Sponsorship, type: :model do
     end
   end
 
+  describe 'explicit booth choice' do
+    let(:conference) { FactoryBot.create(:conference, :full) }
+    let(:plan) { conference.plans.first }
+    let(:sponsorship) { FactoryBot.build(:sponsorship, conference:, plan:, booth_requested: nil) }
+
+    before { plan.update!(booth_size: 1) }
+
+    it 'rejects a missing choice for an eligible plan' do
+      sponsorship.valid?(:update_by_user)
+      expect(sponsorship.errors.of_kind?(:booth_requested, :inclusion)).to be true
+    end
+
+    [true, false].each do |choice|
+      it "accepts an explicit #{choice} choice" do
+        sponsorship.booth_requested = choice
+        sponsorship.valid?(:update_by_user)
+        expect(sponsorship.errors[:booth_requested]).to be_empty
+      end
+    end
+
+    it 'defaults to no booth for an ineligible plan' do
+      plan.update!(booth_size: 0)
+      sponsorship.valid?(:update_by_user)
+      expect(sponsorship.booth_requested).to be false
+      expect(sponsorship.errors[:booth_requested]).to be_empty
+    end
+
+    it 'still rejects a booth request for an ineligible plan' do
+      plan.update!(booth_size: 0)
+      sponsorship.booth_requested = true
+      sponsorship.valid?(:update_by_user)
+      expect(sponsorship.errors.of_kind?(:booth_requested, :not_eligible)).to be true
+    end
+  end
+
   describe 'state management' do
     describe '#accepted?' do
       it 'returns false when accepted_at is nil' do

@@ -152,9 +152,13 @@
       = desc.booth_help_html&.html_safe
 
     .form-group.sponsorships_form_booth_request
+      %p= t('.booth_request_help')
       .form-check
-        = form.check_box :booth_requested, class: 'form-check-input'
-        = form.label :booth_requested, class: 'form-check-label'
+        = form.radio_button :booth_requested, true, checked: sponsorship.booth_requested == true, class: 'form-check-input', required: true
+        = form.label :booth_requested_true, t('.booth_request_yes'), class: 'form-check-label'
+      .form-check
+        = form.radio_button :booth_requested, false, checked: sponsorship.booth_requested == false, class: 'form-check-input', required: true
+        = form.label :booth_requested_false, t('.booth_request_no'), class: 'form-check-label'
       %small.d-none.sponsorships_form_booth_request_uneligible.form-text.text-small.text-info= t('.booth_uneligible_plan_selected', plans: conference.plans.select(&:booth_eligible?).map(&:name).join(', '))
 
   %section.py-2{class: @conference.print_sticker_sponsor_capacity > 0 ? '' : 'd-none'}
