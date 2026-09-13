@@ -80,7 +80,9 @@ en:
               not_eligible: "is not eligible in your selected plan."
             profile:
               too_long: "is too long; maximum is about %{maximum} words on your selected plan"
-
+              must_use_latin_characters: "must use Latin-script characters"
+            name:
+              must_use_latin_characters: "must use Latin-script characters"
   helpers:
     download_previously_uploaded: '(Download previously uploaded file)'
     label:
@@ -213,11 +215,11 @@ en:
       policies: 'Policies'
       submit: 'Submit'
       warnings:
-        english:
-          header: 'The introduction may contain non-English text'
-          body1: 'We request all informations to be filled in English, and non-English text are not permitted. Please confirm the above fields contain only English text, or use the following checkbox to acknowledge in case we are misdetecting non-English text.'
-          body2: 'If we find non-English text upon human review, we may ask you to correct it, and your information may not be published on our website until the correction is made.'
-          acknowledge: 'Yes, I acknowledge that the above fields consist of English text.'
+        latin_text:
+          header: 'The sponsor information contains non-Latin-script text'
+          body1: 'Use Latin-script characters for all sponsor information, including service and organization names.'
+          body2: 'The form cannot be submitted until the organization name and introduction are corrected.'
+          input_error: 'Use Latin-script characters in this field.'
         zip_asset:
           header: 'Verify your .zip archive meets our requirements'
           item0: 'This .zip archive is not encrypted'

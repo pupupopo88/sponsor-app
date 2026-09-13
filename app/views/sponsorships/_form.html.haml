@@ -189,7 +189,7 @@
             = t('.fallback_priority.help_html')
             %ol.d-none
 
-  %section.py-2.sponsorships_form_info
+  %section.py-2.sponsorships_form_info{data: {latin_text_error: t('.warnings.latin_text.input_error')}}
     .form-group
       %h3= t('.information')
 
@@ -209,17 +209,12 @@
       %small.sponsorships_form_profile_help.form-text
 
 
-    %div.py-3.sponsorships_form_info__warning.d-none{data: {warning_kind: 'english'}}
+    %div.py-3.sponsorships_form_info__warning.d-none{data: {warning_kind: 'latin_text'}}
       .card
-        %h5.card-header= t('.warnings.english.header')
+        %h5.card-header= t('.warnings.latin_text.header')
         .card-body
-          %p.card-text= t('.warnings.english.body1')
-          %p.card-text= t('.warnings.english.body2')
-          .form-group.mb-0
-            .form-check
-              %input.form-check-input#sponsorships_form_english_ack{type: 'checkbox'}
-              %label.form-check-label{for: 'sponsorships_form_english_ack'}
-                = t('.warnings.english.acknowledge')
+          %p.card-text= t('.warnings.latin_text.body1')
+          %p.card-text= t('.warnings.latin_text.body2')
 
   %section.py-2
     .form-group
