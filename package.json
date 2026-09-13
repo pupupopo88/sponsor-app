@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "watch": "vite dev",
+    "test:javascript": "playwright test",
     "build": "vite build",
     "format": "prettier --write app/javascript/**/*.{ts,tsx,scss}"
   },

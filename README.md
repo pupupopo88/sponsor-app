@@ -12,6 +12,14 @@ bin/vite dev
 - http://sponsor-app.localhost:1355/
 - http://sponsor-app.localhost:1355/admin
 
+### Tests
+
+```
+bundle exec rspec spec/
+pnpm exec playwright install chromium
+pnpm test:javascript
+```
+
 ### Environment variables
 
 (RubyKaigi organizers: see also https://rubykaigi.esa.io/posts/815)

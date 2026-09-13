@@ -30,6 +30,8 @@
           %p.card-text= t('.copy.explanation')
           .form-group
             = select_tag "sponsorship_id_to_copy", options_for_select(current_available_sponsorships.map {|_| [_.conference.name, _.id] }, params[:sponsorship_id_to_copy]), class: 'form-control form-control-sm sponsorship_id_to_copy_selector', include_blank: true
+          - if @copied_sponsorship
+            .alert.alert-success.mb-0= t('.copy.applied')
   - elsif !sponsorship.persisted? && params[:sponsorship_id_to_copy].present?
     %section.py-3
       .alert.alert-info
@@ -78,6 +80,7 @@
           = contact_form.label :_keep, t('.specify_alternate_billing_contact'), class: 'form-check-label'
 
       %fieldset.d-none
+        %p.alert.alert-info= t('.alternate_billing_contact_help')
         .form-group
           = contact_form.label :email
           = contact_form.email_field :email, class: 'form-control', required: true

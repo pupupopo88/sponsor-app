@@ -22,6 +22,8 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm run build
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test:javascript
       - run: bundle exec rails db:create db:migrate RAILS_ENV=test
       - run: bundle exec rspec -f j -o tmp/rspec_results.json -f d spec
       # - uses: SonicGarden/rspec-report-action@1db4b15383ec30ec6ecfc9e7f92488647f7900bd # v6.0.1
