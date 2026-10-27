@@ -9,15 +9,20 @@ RSpec.describe MoneyForwardInvoiceCsv do
       sponsorships:,
       invoice_date: Date.new(2026, 8, 16),
       delivery_date: Date.new(2026, 10, 3),
+      starting_invoice_number:,
     )
   end
+
+  let(:starting_invoice_number) { 1 }
+  let(:excluded_rows) { invoice_csv.excluded_rows.map { |row| invoice_csv.headers.zip(row).to_h } }
+  let(:excluded_invoice) { excluded_rows.find { |row| row.fetch('行形式') == '請求書' } }
 
   let(:csv_rows) { CSV.parse(invoice_csv.to_csv, headers: true).map(&:to_h) }
   let(:expected_csv) { file_fixture('money_forward_invoice_csv/with_booth.csv').read }
   let(:expected_rows) { CSV.parse(expected_csv, headers: true).map(&:to_h) }
-  let(:expected_invoice) { expected_rows.fetch(0) }
-  let(:expected_plan_item) { expected_rows.fetch(1) }
-  let(:expected_booth_item) { expected_rows.fetch(2) }
+  let(:expected_invoice) { expected_rows.find { |row| row.fetch('行形式') == '請求書' } }
+  let(:expected_plan_item) { expected_rows.find { |row| row.fetch('品名') == 'RubyKaigi YYYY 協賛費用 (Ruby)' } }
+  let(:expected_booth_item) { expected_rows.find { |row| row.fetch('品名') == 'RubyKaigi YYYY 協賛費用 (ブース出展)' } }
 
   let(:sponsorships) { [sponsorship] }
   let(:conference) { instance_double(Conference, name: 'RubyKaigi YYYY') }
@@ -36,6 +41,15 @@ RSpec.describe MoneyForwardInvoiceCsv do
   end
 
   describe '#to_csv' do
+    it 'exports the complete Money Forward CSV' do
+      expect(invoice_csv.to_csv).to eq(expected_csv)
+    end
+
+    it 'uses CRLF line endings required by the import format' do
+      expect(invoice_csv.to_csv).to end_with("\r\n")
+      expect(invoice_csv.to_csv.gsub("\r\n", "")).not_to include("\n", "\r")
+    end
+
     context 'without a booth' do
       let(:sponsorship) do
         instance_double(Sponsorship, billing_contact: contact, plan:, booth_assigned: false, customization: false, expense_report: nil)
@@ -93,12 +107,18 @@ RSpec.describe MoneyForwardInvoiceCsv do
         instance_double(Sponsorship, billing_contact: contact, plan:, booth_assigned: false, customization: true, expense_report:)
       end
 
+      let(:excluded_custom_item) { excluded_rows.find { |row| row.fetch('品名') == 'カスタムスポンサー費用分' } }
+
+      it 'excludes the invoice from the CSV' do
+        expect(CSV.parse(invoice_csv.to_csv)).to eq([described_class::COLUMNS.values])
+      end
+
       it 'separates the negative invoice from exported rows without capping the deduction' do
         expect(invoice_csv.rows).to eq([])
-        expect(invoice_csv.headers.zip(invoice_csv.excluded_rows.fetch(0)).to_h).to include(
+        expect(excluded_invoice).to include(
           '請求書番号' => nil, '小計' => -100_000, '消費税' => -10_000, '合計金額' => -110_000,
         )
-        expect(invoice_csv.headers.zip(invoice_csv.excluded_rows.fetch(2)).to_h).to include(
+        expect(excluded_custom_item).to include(
           '品名' => 'カスタムスポンサー費用分', '単価' => -400_000, '金額' => -400_000,
         )
       end
@@ -115,26 +135,6 @@ RSpec.describe MoneyForwardInvoiceCsv do
         expect(csv_rows.first).to eq(expected_invoice.merge('小計' => '0', '消費税' => '0', '合計金額' => '0'))
         expect(csv_rows.last).to include('品名' => 'カスタムスポンサー費用分', '単価' => '-300000', '金額' => '-300000')
         expect(invoice_csv.excluded_rows).to eq([])
-      end
-    end
-
-    it 'exports the complete Money Forward CSV' do
-      expect(invoice_csv.to_csv).to eq(expected_csv)
-    end
-
-    it 'uses CRLF line endings required by the import format' do
-      expect(invoice_csv.to_csv).to end_with("\r\n")
-      expect(invoice_csv.to_csv.gsub("\r\n", "")).not_to include("\n", "\r")
-    end
-
-    context 'with a negative invoice' do
-      let(:expense_report) { instance_double(ExpenseReport, status: 'approved', total_amount: 400_000) }
-      let(:sponsorship) do
-        instance_double(Sponsorship, billing_contact: contact, plan:, booth_assigned: false, customization: true, expense_report:)
-      end
-
-      it 'excludes the invoice from the CSV' do
-        expect(CSV.parse(invoice_csv.to_csv)).to eq([described_class::COLUMNS.values])
       end
     end
   end
@@ -164,20 +164,12 @@ RSpec.describe MoneyForwardInvoiceCsv do
         expected_plan_item,
         expected_booth_item,
       ])
-      expect(invoice_csv.excluded_rows.fetch(0).fetch(6)).to be_nil
+      expect(excluded_invoice.fetch('請求書番号')).to be_nil
     end
   end
 
   context 'with a specified starting invoice number' do
-    subject(:invoice_csv) do
-      described_class.new(
-        conference:,
-        sponsorships:,
-        invoice_date: Date.new(2026, 8, 16),
-        delivery_date: Date.new(2026, 10, 3),
-        starting_invoice_number: 42,
-      )
-    end
+    let(:starting_invoice_number) { 42 }
 
     it 'uses the specified number with zero padding' do
       expect(invoice_csv.to_csv).to eq(expected_csv.sub('20260816-001', '20260816-042'))
